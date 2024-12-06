@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('成绩单新增')"/>
+</head>
+<body>
+<form class="layui-form">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="layui-form-item">
+                <label class="layui-form-label">主键：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="id" lay-verify="title" autocomplete="off" placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">词汇书：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="bookCode" lay-verify="title" autocomplete="off" placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">答对量：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="score" lay-verify="title" autocomplete="off" placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">总题量：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="point" lay-verify="title" autocomplete="off" placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit="" lay-filter="form-save">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+<th:block th:include="common/include :: footer"/>
+<script>
+    layui.use(['table', 'form', 'jquery', 'transfer'], function () {
+        let table = layui.table,
+            form = layui.form,
+            $ = layui.jquery,
+            transfer = layui.transfer;
+
+        let MODULE_API = '/english/api/score/';
+
+        /**
+         * 提交创建成绩单表单
+         */
+        form.on('submit(form-save)', function (data) {
+            let formData = data.field;
+
+            $.ajax({
+                url: MODULE_API + 'add',
+                data: JSON.stringify(formData),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status == 200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("main_table");
+                        });
+                    } else {
+                        layer.open({content: result.message});
+                    }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

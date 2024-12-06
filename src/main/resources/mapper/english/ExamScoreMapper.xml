@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.example.demo.modules.english.dao.ExamScoreMapper">
+    <resultMap id="BaseResultMap" type="cn.example.demo.modules.english.model.entity.ExamScore">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="book_code" jdbcType="VARCHAR" property="bookCode"/>
+        <result column="score" jdbcType="INTEGER" property="score"/>
+        <result column="point" jdbcType="INTEGER" property="point"/>
+        <result column="exam_time" jdbcType="TIMESTAMP" property="examTime"/>
+        <result column="total_questions" jdbcType="INTEGER" property="totalQuestions"/>
+        <result column="answer_true" jdbcType="INTEGER" property="answerTrue"/>
+        <result column="book_name" jdbcType="VARCHAR" property="bookName"/>
+        <result column="real_name" jdbcType="VARCHAR" property="userRealName"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Example_Where_Clause1">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and t1.${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and t1.${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and t1.${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and t1.${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+        id
+        , user_id, book_code, score, point, exam_time, total_questions, answer_true
+    </sql>
+
+    <select id="aggregateByExample" parameterType="cn.example.demo.modules.english.model.entity.ExamScoreExample"
+            resultMap="BaseResultMap">
+        select user_id, sum(point) as point
+        from exam_score
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        group by user_id
+    </select>
+
+    <select id="selectAssociateByExample" parameterType="cn.example.demo.modules.english.model.entity.ExamScoreExample"
+            resultMap="BaseResultMap">
+        select t1.*, t2.real_name, t3.book_name
+        from exam_score t1
+        join sys_user t2 on t1.user_id = t2.user_id
+        join english_book t3 on t1.book_code = t3.book_code
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause1"/>
+        </if>
+    </select>
+</mapper>

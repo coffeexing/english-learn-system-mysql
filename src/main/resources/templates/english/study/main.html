@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('英语学习')"/>
+    <link rel="stylesheet" href="/admin/css/other/console2.css"/>
+    <style>
+        .font-red {
+            color: #FF2912 !important;
+        }
+
+        .font-green {
+            color: #31802A !important;
+        }
+
+        .font-gray {
+            color: grey !important;
+        }
+
+        .font-blue {
+            color: #1890ff !important
+        }
+
+        .english-book-panel {
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            line-height: normal;
+            height: 350px;
+            overflow: hidden;
+        }
+
+        .english-book-panel:hover {
+            box-shadow: 0px 0px 20px 0 lightgray inset;
+        }
+
+        .english-book-panel .layui-icon {
+            font-size: 60px;
+        }
+
+        .english-book-panel .layui-icon-template-1 {
+            margin-right: 30px;
+        }
+
+        .english-book-panel header {
+            background: linear-gradient(45deg, #1890ffe8, #72b6f6cf);
+            color: ghostwhite;
+            padding: 15px 10px;
+            border-radius: 15px 15px 0px 0px;
+            height: 50%;
+        }
+
+        .english-book-panel header:hover {
+            cursor: pointer;
+        }
+
+        .english-book-panel section {
+            padding: 15px 10px;
+        }
+
+        .english-book-panel .footer {
+            font-size: 18px;
+            color: #1890ff;
+        }
+
+        .english-book-panel .description {
+            height: 60px;
+            text-align: left;
+            overflow-y: auto;
+        }
+
+        .layui-card-header {
+            border-bottom: 0px;
+        }
+
+        .layui-card-header .layui-elem-field, .layui-card-header .layui-field-title {
+            margin-top: 0px;
+        }
+    </style>
+</head>
+<body class="pear-container">
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md12">
+        <div class="layui-row layui-col-space10">
+            <!-- 英语词汇书 -->
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        <fieldset class="layui-elem-field layui-field-title">
+                            <legend><h3><strong>请选择英语词汇书</strong></h3></legend>
+                        </fieldset>
+                    </div>
+                    <div class="layui-card-body">
+                        <div class="layui-row layui-col-space15">
+                            <div class="layui-col-md3 layui-col-sm3 layui-col-xs3" th:each="book:${books}">
+                                <div class="english-book-panel">
+                                    <header th:attr="data-bookName=${book.getBookName()}, data-bookCode=${book.getId()}"
+                                            onclick="insideMethods.openStudyPage(this)">
+                                        <i class="layui-icon layui-icon-template-1"></i>
+                                        <i class="layui-icon layui-icon-read"></i>
+                                        <div><h1 th:text="${book.getBookName()}"></h1></div>
+                                    </header>
+                                    <section>
+                                        <div class="description" th:text="${book.getDescription()}"></div>
+                                        <hr>
+                                        <div class="footer">
+                                            <span style="color: darkgray">词汇量：</span>
+                                            <strong th:text="${book.getTotalWords()}"></strong>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="common/include :: footer"/>
+</body>
+</html>
+<script>
+    layui.use(['layer'], function () {
+        let $ = layui.jquery,
+            laydate = layui.laydate;
+
+        let MODULE_PATH = '/english/study/';
+
+        let methods = {
+            openStudyPage: function (obj) {
+                window.open($(obj).attr('data-bookCode'), $(obj).attr('data-bookName'));
+            }
+        };
+
+        // 将内部方法传递到window对象
+        window.insideMethods = methods;
+
+        window.open = function (bookCode, bookName) {
+            layer.open({
+                type: 2,
+                title: '英语学习 / ' + bookName,
+                shade: 0.1,
+                area: ['100%', '100%'],
+                content: MODULE_PATH + 'panel/' + bookCode
+            });
+        }
+    });
+</script>

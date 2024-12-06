@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('英语学习')"/>
+    <link rel="stylesheet" href="/admin/css/other/console2.css"/>
+    <style>
+        .font-blue {
+            color: #1890ff !important
+        }
+
+        .english-book-panel {
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            line-height: normal;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .english-book-panel:hover {
+            box-shadow: 0px 0px 20px 0 lightgray inset;
+        }
+
+        .english-book-panel .layui-icon {
+            font-size: 60px;
+        }
+
+        .english-book-panel header {
+            background: linear-gradient(45deg, #1890ffe8, #72b6f6cf);
+            color: ghostwhite;
+            padding: 15px 10px;
+            border-radius: 15px 15px 0px 0px;
+            height: 40%;
+            text-align: center;
+        }
+
+        .english-book-panel header:hover {
+            cursor: pointer;
+        }
+
+        .english-book-panel section {
+            padding: 15px 10px;
+        }
+
+        .english-book-panel .footer {
+            font-size: 18px;
+            color: #1890ff;
+        }
+
+        .english-book-panel .description {
+            height: 70px;
+            text-align: left;
+            overflow-y: auto;
+        }
+
+        .layui-card-header {
+            border-bottom: 0px;
+        }
+
+        .layui-card-header .layui-elem-field, .layui-card-header .layui-field-title {
+            margin-top: 0px;
+        }
+    </style>
+</head>
+<body class="pear-container">
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md12">
+        <div class="layui-row layui-col-space10">
+            <!-- 英语词汇书 -->
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        <fieldset class="layui-elem-field layui-field-title">
+                            <legend><h3><strong>请选择学习关卡</strong></h3></legend>
+                        </fieldset>
+                    </div>
+                    <div class="layui-card-body">
+                        <div class="layui-row layui-col-space15">
+                            <div class="layui-col-md4 layui-col-sm4 layui-col-xs4">
+                                <div class="english-book-panel">
+                                    <header data-panel="1"
+                                            th:attr="data-bookCode=${book.getBookCode()},data-bookId=${book.getId()}"
+                                            onclick="insideMethods.openStudyPage(this)">
+                                        <i class="layui-icon layui-icon-star-fill"></i>
+                                        <div><h1>基础学习</h1></div>
+                                    </header>
+                                    <section>
+                                        <div class="description">查看英文单词、短语及对应的汉语意思，可以听相应的单词读音，逐个通过学习。</div>
+                                        <hr>
+                                        <div class="footer">
+                                            <span style="color: darkgray">试题量：</span>
+                                            <strong th:text="${book.getBasePracticeNum()}"></strong>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                            <div class="layui-col-md4 layui-col-sm4 layui-col-xs4">
+                                <div class="english-book-panel">
+                                    <header data-panel="2"
+                                            th:attr="data-bookCode=${book.getBookCode()},data-bookId=${book.getId()}"
+                                            onclick="insideMethods.openStudyPage(this)">
+                                        <i class="layui-icon layui-icon-star-fill"></i>
+                                        <i class="layui-icon layui-icon-star-fill"></i>
+                                        <div><h1>英译汉</h1></div>
+                                    </header>
+                                    <section>
+                                        <div class="description">给出单词读音（词组不用读音）和对应单词、词组英文，点击按钮再显示对应中文意思，逐个通过学习。</div>
+                                        <hr>
+                                        <div class="footer">
+                                            <span style="color: darkgray">试题量：</span>
+                                            <strong th:text="${book.getTranslatePracticeNum()}"></strong>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                            <div class="layui-col-md4 layui-col-sm4 layui-col-xs4">
+                                <div class="english-book-panel">
+                                    <header data-panel="3"
+                                            th:attr="data-bookCode=${book.getBookCode()},data-bookId=${book.getId()}"
+                                            onclick="insideMethods.openStudyPage(this)">
+                                        <i class="layui-icon layui-icon-star-fill"></i>
+                                        <i class="layui-icon layui-icon-star-fill"></i>
+                                        <i class="layui-icon layui-icon-star-fill"></i>
+                                        <div><h1>综合测试</h1></div>
+                                    </header>
+                                    <section>
+                                        <div class="description">
+                                            给出单词、词组汉语意思，在输入框输入单词拼写，系统进行对错判断，正确跳到下一个单词，错误则显示出正确意思，逐个通过学习，时间限制每个单词8秒计时，超时算错，最后系统记录当前测试成绩（100分制），测试满分可积累学习积分10分。
+                                        </div>
+                                        <hr>
+                                        <div class="footer">
+                                            <span style="color: darkgray">试题量：</span>
+                                            <strong th:text="${book.getExamNum()}"></strong>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="common/include :: footer"/>
+</body>
+</html>
+<script>
+    layui.use(['layer'], function () {
+        let $ = layui.jquery,
+            laydate = layui.laydate;
+
+        let MODULE_PATH = '/english/study/';
+
+        let methods = {
+            openStudyPage: function (obj) {
+                if ($(obj).attr('data-panel') == 1) {
+                    window.open(`${MODULE_PATH}base/${$(obj).attr('data-bookId')}/${$(obj).attr('data-bookCode')}`, '基础学习');
+                } else if ($(obj).attr('data-panel') == 2) {
+                    window.open(`${MODULE_PATH}translate/${$(obj).attr('data-bookId')}/${$(obj).attr('data-bookCode')}`, '英译汉');
+
+                } else if ($(obj).attr('data-panel') == 3) {
+                    window.open(`${MODULE_PATH}comprehensive/${$(obj).attr('data-bookId')}/${$(obj).attr('data-bookCode')}`, '综合测试');
+                }
+            }
+        };
+
+        // 将内部方法传递到window对象
+        window.insideMethods = methods;
+
+        window.open = function (uri, title) {
+            layer.open({
+                type: 2,
+                title: title,
+                shade: 0.1,
+                area: ['100%', '100%'],
+                content: uri
+            });
+        }
+    });
+</script>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('成绩单列表')"/>
+</head>
+<body class="pear-container">
+<div class="layui-row">
+    <div class="layui-col-lg12 layui-col-md12 layui-col-sm12 layui-col-xs12">
+        <div class="layui-card">
+            <div class="layui-card-body">
+                <form class="layui-form" action="" lay-filter="query-form">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">词汇书：</label>
+                        <div class="layui-input-inline">
+                            <select id="book_list" name="bookCode" required lay-search></select>
+                        </div>
+                        <label class="layui-form-label">考试时间：</label>
+                        <div class="layui-input-inline input-lg">
+                            <input type="text" id="exam_time" name="examTime" lay-verify="title" autocomplete="off"
+                                   placeholder="请选择" class="layui-input" readonly style="width: 300px">
+                        </div>
+                        <div style="float: right">
+                            <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="form_query">
+                                <i class="layui-icon layui-icon-search"></i>
+                                查询
+                            </button>
+                            <button type="reset" class="pear-btn pear-btn-md">
+                                <i class="layui-icon layui-icon-refresh"></i>
+                                重置
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-lg12 layui-col-md12 layui-col-sm12 layui-col-xs12">
+        <div class="layui-card">
+            <div class="layui-card-header">
+                <fieldset class="layui-elem-field layui-field-title">
+                    <legend><h3><strong>考试成绩表</strong></h3></legend>
+                </fieldset>
+            </div>
+            <div class="layui-card-body">
+                <table id="main_table" lay-filter="main_table"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:include="common/include :: footer"/>
+<script type="text/html" id="table_toolbar">
+</script>
+<script type="text/html" id="row_bar" th:if="${auth}">
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i
+            class="pear-icon pear-icon-edit"></i>
+    </button>
+    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i
+            class="pear-icon pear-icon-ashbin"></i>
+    </button>
+</script>
+<script type="text/html" id="status_code">
+    {{#if (d.status == 1) { }}
+    <span class="layui-bg-gray">正常</span>
+    {{# }else if(d.status == 0){ }}
+    <span>禁用</span>
+    {{# } }}
+</script>
+<script>
+    layui.use(['table', 'dtree', 'form', 'jquery', 'popup', 'common', 'laydate'], function () {
+        let table = layui.table
+            , form = layui.form
+            , $ = layui.jquery
+            , dtree = layui.dtree
+            , popup = layui.popup
+            , common = layui.common
+            , laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#exam_time'
+            , range: '~'
+            , format: 'yyyy/MM/dd HH:mm:ss'
+            , type: 'datetime'
+            , trigger: 'click'
+        });
+
+        let MODULE_API = '/english/api/score/';
+        let MODULE_API1 = '/english/api/book/english_book/';
+        let MODULE_PATH = '/english/score/';
+
+        // 字典列表
+        let list = getDictionaryList(`${MODULE_API1}code_dict/list`);
+        let options = utilsObj.renderSelectOptions(list, {value: 'code', name: 'name'});
+        $('#book_list').html('<option value="">请选择词汇书</option>' + options);
+        // 重新渲染 select 选择框
+        form.render('select');
+
+        table.render({
+            elem: '#main_table',
+            url: MODULE_API + 'retrieval',
+            page: true,
+            cellMinWidth: 100,
+            // skin: 'row',
+            height: 'full-148',
+            toolbar: '#table_toolbar',
+            totalRow: true,
+            text: {none: '暂无信息'},
+            // defaultToolbar: [{layEvent: 'refresh', icon: 'layui-icon-refresh'}, 'filter', 'print', 'exports'],
+            cols: [
+                [
+                    {type: 'checkbox', totalRowText: '个人累积积分：', width: 150},
+                    {title: '用户', field: 'userRealName', align: 'center', minWidth: 100},
+                    {title: '词汇书', field: 'bookName', align: 'center', minWidth: 200},
+                    {title: '总分制', field: 'totalScore', align: 'center', minWidth: 200},
+                    {title: '考试分数', field: 'score', align: 'center', minWidth: 200},
+                    {title: '积分', field: 'point', align: 'center', minWidth: 200},
+                    {title: '总题量', field: 'totalQuestions', align: 'center', minWidth: 200},
+                    {title: '答对量', field: 'answerTrue', align: 'center', minWidth: 200},
+                    {title: '考试时间', field: 'examTime', align: 'center', minWidth: 200},
+                    {title: '操作', toolbar: '#row_bar', align: 'center', minWidth: 150, fixed: 'right'}
+                ]
+            ]
+            , parseData: function (res) { //res 即为原始返回的数据
+                return getParesDataResult(res);
+            }
+        });
+
+        table.on('tool(main_table)', function (obj) {
+            if (obj.event === 'remove') {
+                window.remove(obj);
+            } else if (obj.event === 'edit') {
+                window.edit(obj);
+            }
+        });
+
+        table.on('toolbar(main_table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add();
+            } else if (obj.event === 'refresh') {
+                window.refresh();
+            }
+        });
+
+        form.on('submit(form_query)', function (data) {
+            let formData = data.field;
+
+            // 日期区间截取
+            let str = formData.examTime;
+            let date = str.split(' ~ ');
+            let o = {startDate: date[0], endDate: date[1]};
+            // 合并对象
+            $.extend(formData, o);
+            // 删除不需要的表单对象
+            delete formData.examTime;
+
+            window.refresh(data.field);
+            return false;
+        });
+
+        window.add = function () {
+            layer.open({
+                type: 2,
+                title: '添加成绩单',
+                shade: 0.1,
+                area: ['100%', '100%'],
+                content: `${MODULE_PATH}add`
+            });
+        }
+
+        window.edit = function (obj) {
+            layer.open({
+                type: 2,
+                title: '修改',
+                shade: 0.1,
+                area: ['100%', '100%'],
+                content: `${MODULE_PATH}edit/${obj.data['id']}`
+            });
+        }
+
+        window.remove = function (obj) {
+            layer.confirm('确定要删除该成绩单', {icon: 3, title: '提示'}, function (index) {
+                layer.close(index);
+                let loading = layer.load();
+                $.ajax({
+                    url: `${MODULE_API}remove/${obj.data['id']}`,
+                    dataType: 'json',
+                    type: 'delete',
+                    success: function (result) {
+                        layer.close(loading);
+                        if (result.status == 200) {
+                            popup.success(result.message, function () {
+                                obj.del();
+                            });
+                        } else {
+                            popup.failure(result.message);
+                        }
+                    }
+                })
+            });
+        }
+
+        window.refresh = function (param) {
+            table.reload('main_table', {where: param});
+        }
+    });
+</script>
+</body>
+</html>

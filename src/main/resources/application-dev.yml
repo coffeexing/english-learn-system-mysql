@@ -1,0 +1,31 @@
+# Web Server Config
+server:
+  port: 8080
+  compression:
+    enabled: true
+  servlet:
+    context-path: /
+
+# Spring Config
+spring:
+  # Datasource Config
+  datasource:
+    url: jdbc:mysql://rm-gc7250qh25mtg1psvzo.mysql.cn-chengdu.rds.aliyuncs.com/english_learn_sys?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+    username: admin_tiku
+    password: Tiku2024
+    # HikariCP Connection Pools
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 60000
+      idle-timeout: 60000
+      max-lifetime: 60000
+      validation-timeout: 3000
+      login-timeout: 5
+
+# Print SQL
+logging:
+  level:
+    cn:
+      example:
+        demo:
+          modules: debug

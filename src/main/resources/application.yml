@@ -1,0 +1,37 @@
+# Spring Config
+spring:
+  profiles:
+    active: dev
+#    active: dev.oracle
+#    active: prod
+#    active: multi.source
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 1024MB
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:./static/
+      add-mappings: true
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+# MyBatis 配置
+mybatis-plus:
+  # mapper 文件配置
+  # classpath就是应用程序的 resources 路径 与 java 路径，能同时匹配 java/... 与 resources/...
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: cn.example.demo.modules.sys.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+#OtherBaseInfoConfig
+global:
+  secure-center:
+    port: 8080
+    token-name: AUTH_TOKEN
+    token-secure-uri: /token/authenticate
+    login-uri: /account/login
+  cors-config:
+    allowed-origins: http://localhost:8080,http://localhost:8280
+

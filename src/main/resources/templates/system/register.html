@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('用户注册')"/>
+    <link rel="stylesheet" th:href="@{/admin/css/other/login.css}"/>
+</head>
+<!-- 代 码 结 构 -->
+<body background="/admin/images/login.svg">
+<form class="layui-form" lay-filter="register" action="javascript:void(0);" style="width: 470px !important;">
+    <div class="layui-form-item">
+        <img class="logo" src="/admin/images/logo.png"/>
+        <div class="title">用户注册</div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">账号</label>
+        <div class="layui-input-block">
+            <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入"
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-block">
+            <input type="password" name="password" lay-verify="title" autocomplete="off" placeholder="请输入"
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">确认密码</label>
+        <div class="layui-input-block">
+            <input type="password" id="password_confirm" lay-verify="title" autocomplete="off" placeholder="请输入"
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">姓名</label>
+        <div class="layui-input-block">
+            <input type="text" name="realName" lay-verify="title" autocomplete="off" placeholder="请输入"
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">邮箱</label>
+        <div class="layui-input-block">
+            <input type="text" name="email" lay-verify="title" autocomplete="off" placeholder="请输入"
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">电话</label>
+        <div class="layui-input-block">
+            <input type="text" name="phone" lay-verify="title" autocomplete="off" placeholder="请输入"
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">性别</label>
+        <div class="layui-input-block">
+            <input type="radio" name="sex" value="1" title="男" checked>
+            <input type="radio" name="sex" value="0" title="女">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <button class="pear-btn pear-btn-success login" id="register">
+            注册
+        </button>
+    </div>
+</form>
+<th:block th:include="common/include :: footer"/>
+<script>
+    layui.use(['form', 'jquery', 'layer', 'button', 'popup'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let layer = layui.layer;
+        let button = layui.button;
+        let popup = layui.popup;
+
+        $('#register').on('click', function () {
+            let data = form.val('register');
+
+            let b3 = checkConfirmPassword();
+            if (b3) {
+                let loader = layer.load();
+                let btn = button.load({elem: '.login'});
+                $.ajax({
+                    url: '/system/api/user/register',
+                    data: JSON.stringify(data),
+                    type: "post",
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function (result) {
+                        layer.close(loader);
+                        btn.stop(function () {
+                            if (result.status == 200) {
+                                popup.success(result.message, function () {
+                                    window.location.href = "/login";
+                                })
+                            } else {
+                                popup.failure(result.message, function () {
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        $('#password_confirm').on('blur', function () {
+            // 密码再次确认检测
+            checkConfirmPassword();
+        });
+
+        /**
+         * 密码确认检测
+         * */
+        function checkConfirmPassword() {
+            $('#password_confirm').next().remove();
+            let param = $('#password_confirm').val();
+            if (param == '') {
+                $('#password_confirm').after('<span style="color: red">请再次输入密码！</span>');
+            } else {
+                if (param == form.val('register')['password']) {
+                    $('#password_confirm').after('<i class=\"nav-icon fas fa-check\"></i>&nbsp;');
+                    return true;
+                } else {
+                    $('#password_confirm').after('<span style="color: red">两次密码输入不一致！</span>');
+                }
+            }
+            return false;
+        }
+    });
+</script>
+</body>
+</html>

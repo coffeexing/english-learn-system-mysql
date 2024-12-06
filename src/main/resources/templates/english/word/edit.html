@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('英语词库编辑')"/>
+</head>
+<body>
+<form class="layui-form" th:if="${exist}">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="layui-form-item layui-hide">
+                <label class="layui-form-label">主键：</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${id}" name="id" lay-verify="title" autocomplete="off"
+                           placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">词汇书：</label>
+                <div class="layui-input-block">
+                    <select id="book_list" name="bookCode" required lay-search></select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">词语类型：</label>
+                <div class="layui-input-block">
+                    <select name="wordType" lay-verify="required">
+                        <option value="">请选择</option>
+                        <option th:selected="${wordType} eq 1" value="1">单词</option>
+                        <option th:selected="${wordType} eq 2" value="2">词语</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">单词：</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${word}" name="word" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">汉译：</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${chinese}" name="chinese" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">详解：</label>
+                <div class="layui-input-block">
+                    <textarea th:text="${description}" placeholder="请输入描述" name="description"
+                              class="layui-textarea"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit="" lay-filter="form-save">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+<h2 th:if="${!exist}">英语词库不存在！</h2>
+
+<th:block th:include="common/include :: footer"/>
+<script th:inline="javascript">
+    layui.use(['table', 'form', 'jquery', 'transfer'], function () {
+        let table = layui.table,
+            form = layui.form,
+            $ = layui.jquery,
+            transfer = layui.transfer;
+
+        let MODULE_API = '/english/api/word/';
+        let MODULE_API1 = '/english/api/book/english_book/';
+
+        // 字典列表
+        let list = getDictionaryList(`${MODULE_API1}code_dict/list`);
+        let options = utilsObj.renderSelectOptions(list, {value: 'code', name: 'name', selectedValue: [[${bookCode}]]});
+        $('#book_list').html('<option value="">请选择词汇书</option>' + options);
+        // 重新渲染 select 选择框
+        form.render('select');
+
+        /**
+         * 提交编辑英语词库表单
+         */
+        form.on('submit(form-save)', function (data) {
+            let formData = data.field;
+
+            $.ajax({
+                url: MODULE_API + 'modify',
+                data: JSON.stringify(formData),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'put',
+                success: function (result) {
+                    if (result.status == 200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("main_table");
+                        });
+                    } else {
+                        layer.open({content: result.message});
+                    }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('综合测试')"/>
+
+    <style>
+        .layui-progress-bar {
+            background-color: #1890ff;
+        }
+
+        .font-blue {
+            color: #1890ff !important
+        }
+
+        .exam-panel {
+            overflow: auto;
+        }
+
+        .exam-panel .body {
+            background-color: #FFFFFF;
+            padding: 10px 20px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .exam-panel .body .layui-icon-speaker {
+            font-size: 30px;
+        }
+
+        .exam-panel .body .layui-icon-speaker:hover {
+            cursor: pointer;
+        }
+
+        .exam-panel .title {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .exam-panel .button {
+            background-color: #1890ff;
+            color: ghostwhite;
+        }
+
+        .operation {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .answer .layui-input-inline {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body class="pear-container">
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-lg12 layui-col-md12 layui-col-sm12 layui-col-xs12">
+        <div class="layui-card">
+            <div class="layui-card-body">
+                <h3><span style="margin-right: 15px;color: grey">考试进度</span>
+                    <b id="study_progress" th:text="'0 / '+${total}"></b>
+                </h3>
+                <div class="layui-progress layui-progress-big" lay-filter="progress" lay-showpercent="true">
+                    <div class="layui-progress-bar" lay-percent="0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 试题练习区（居中布局） -->
+    <div class="layui-col-lg2 layui-col-md2 layui-col-sm2 layui-col-xs2"></div>
+    <div class="layui-col-lg8 layui-col-md8 layui-col-sm8 layui-col-xs8">
+        <div class="layui-carousel" id="stepForm" lay-filter="stepForm" style="margin: 0 auto;">
+            <!-- 试题轮播 -->
+            <div carousel-item>
+                <!-- 试题列表 -->
+                <div class="exam-panel" th:each="word:${words}">
+                    <div class="tip">
+                        <div class="title"><h3><b>发音</b></h3></div>
+                        <div class="body">
+                            <h1 class="font-blue">
+                                <i th:attr="word-id=${word.getId()}" class="layui-icon layui-icon-speaker"
+                                   onclick="insideMethods.playMp3(this)"></i>
+                                <audio th:src="'/english/api/word/pronounce/'+${word.getId()}"
+                                       th:id="'word_'+${word.getId()}"
+                                       controls preload hidden>
+                                </audio>
+                            </h1>
+                        </div>
+                        <div class="title"><h3><b>中文释义</b></h3></div>
+                        <div class="body" th:text="${word.getChinese()}"></div>
+                    </div>
+                    <div class="answer">
+                        <div class="title"><h3><b>作答</b></h3></div>
+                        <div class="body">
+                            <span>单词：</span>
+                            <div class="layui-input-inline">
+                                <input th:id="answer_+${word.getId()}" class="layui-input" type="text"
+                                       placeholder="请输入" autocomplete="off">
+                            </div>
+                            <button th:attr="word-id=${word.getId()}"
+                                    class="confirm pear-btn pear-btn-md pear-btn-primary"
+                                    onclick="insideMethods.confirmAnswer(this)">
+                                <i class="layui-icon layui-icon-form"></i>&nbsp;确认
+                            </button>
+                        </div>
+                    </div>
+                    <div th:attr="word-id=${word.getId()}" class="result"></div>
+                    <div class="operation">
+                        <button th:attr="word-id=${word.getId()}" class="pear-btn pear-btn-primary pear-btn-lg"
+                                onclick="insideMethods.nextQuestion(this)" disabled style="opacity: 0.5">下一题&nbsp;<i
+                                class="layui-icon layui-icon-next"></i>
+                        </button>
+                        <span>还剩：<b class="timeInterval">30</b>&nbsp;秒</span>
+                    </div>
+                </div>
+                <!-- 考试提交 -->
+                <div id="exam_submit">
+                    <div style="text-align: center;margin-top: 50px;">
+                        <i class="layui-icon layui-circle"
+                           style="color: white;font-size:30px;font-weight:bold;background: #1890ff;padding: 20px;line-height: 80px;">&#xe605;</i>
+                        <div style="font-size: 24px;color: #1890ff;font-weight: 500;margin-top: 30px;">
+                            作答完成，请点击提交！
+                        </div>
+                    </div>
+                    <div class="operation">
+                        <button class="pear-btn pear-btn-primary pear-btn-lg" onclick="insideMethods.submit(this)">
+                            <i class="layui-icon layui-icon-home"></i>&nbsp;提交
+                        </button>
+                    </div>
+                </div>
+                <!-- 轮播结束面板 -->
+                <div>
+                    <div style="text-align: center;margin-top: 50px;">
+                        <i class="layui-icon layui-circle"
+                           style="color: white;font-size:30px;font-weight:bold;background: #1890ff;padding: 20px;line-height: 80px;">&#xe605;</i>
+                        <div style="font-size: 24px;color: #1890ff;font-weight: 500;margin-top: 30px;">
+                            考试结果如下：
+                        </div>
+                        <pre id="exam_result"></pre>
+                    </div>
+                    <div class="operation">
+                        <button class="pear-btn pear-btn-primary pear-btn-lg"
+                                onclick="insideMethods.returnMajor(this)"><i class="layui-icon layui-icon-home"></i>&nbsp;返回主页
+                        </button>
+                        <button class="pear-btn pear-btn-primary pear-btn-lg"
+                                onclick="insideMethods.nextStep(this)"><i class="layui-icon layui-icon-return"></i>&nbsp;试题回顾
+
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-lg2 layui-col-md2 layui-col-sm2 layui-col-xs2"></div>
+</div>
+
+<th:block th:include="common/include :: footer"/>
+<script th:inline="javascript">
+    layui.use(['element', 'form', 'jquery', 'popup', 'step', 'layer'], function () {
+        let element = layui.element
+            , form = layui.form
+            , $ = layui.jquery
+            , popup = layui.popup
+            , step = layui.step
+            , layer = layui.layer;
+
+        let MODULE_API = '/english/api/word/';
+        let MODULE_SCORE_API = '/english/api/score/';
+
+        step.render({
+            elem: '#stepForm',
+            filter: 'stepForm',
+            width: '100%',
+            stepWidth: '600px',
+            height: '600px',
+            stepItems: []
+        });
+
+        let timeInterval = startAnswerInterval();  // 初始化倒计时（第1题）
+
+        let bookCode = [[${bookCode}]];
+        let total = [[${total}]];
+        let answerTrue = new Set(); // 作答正确
+        let answerCache = new Set();  // 已作答数
+        let methods = {
+            preStep: function (obj) {
+                step.pre('#stepForm');
+            },
+
+            nextStep: function (obj) {
+                step.next('#stepForm');
+            },
+
+            nextQuestion: function (obj) {
+                // 参数验证
+                let wordId = $(obj).attr('word-id');
+                if (wordId) {
+                    if ($('#answer_' + wordId).val() === '') {
+                        layer.msg('作答不能为空！');
+                        return;
+                    }
+                }
+
+                // 作答记录缓存
+                answerCache.add(wordId);
+                // 计算当前学习进度
+                let p = (answerCache.size / total * 100).toFixed(2) + '%';
+                element.progress('progress', p);
+                $('#study_progress').text(answerCache.size + ' / ' + total);
+                // 跳转下一题
+                step.next('#stepForm');
+                // 下一题倒计时开始
+                if (answerCache.size != total) {
+                    timeInterval = startAnswerInterval();
+                }
+                // 更改操作按钮
+                changeOperation(obj);
+            },
+
+            returnMajor: function (obj) {
+                parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+            },
+
+            playMp3: function (obj) {
+                let audioId = 'word_' + $(obj).attr('word-id');
+                if ($('#' + audioId)) {
+                    let player = $('#' + audioId)[0];
+                    if (!player.error) {
+                        if (player.paused) {
+                            player.play();
+                        } else {
+                            player.pause();
+                        }
+                    } else {
+                        layer.tips('暂无音源！', $(obj));
+                    }
+                }
+            },
+
+            confirmAnswer: function (obj) {
+                let wordId = $(obj).attr('word-id');
+                if (wordId) {
+                    if ($('#answer_' + wordId).val() === '') {
+                        layer.tips('作答不能为空！', $(obj));
+                        return;
+                    }
+                    // 答案验证
+                    let loader = layer.load();
+                    $.ajax({
+                        url: MODULE_API + 'verify/' + wordId + '/' + $('#answer_' + wordId).val(),
+                        dataType: 'json',
+                        type: 'get',
+                        success: function (result) {
+                            // 清除当前作答题倒计时
+                            clearInterval(timeInterval);
+                            // 关闭加载层
+                            layer.close(loader);
+                            if (result.status == 200) {
+                                // 禁止重复作答
+                                disabledAnswer(wordId);
+                                // 作答结果显示
+                                let data = result.data;
+                                // 作答正确
+                                if (data.code == 1) {
+                                    popup.success(data['msg']);
+                                    showAnswerResult(wordId, data['trueAnswer'], 1);
+                                    answerTrue.add(wordId); // 记录正确数
+
+                                    // 作答错误
+                                } else if (data.code == 0) {
+                                    popup.failure(data['msg']);
+                                    showAnswerResult(wordId, data['trueAnswer'], 0);
+                                    // 超时作答
+                                } else if (data.code == -1) {
+                                    popup.failure(data['msg']);
+                                    showAnswerResult(wordId, data['trueAnswer'], -1);
+                                }
+                                // 下一题可用
+                                $(`.exam-panel .operation button[word-id=${wordId}]`).attr({
+                                    'disabled': false,
+                                    'style': null
+                                });
+
+                            } else {
+                                popup.failure(result.message);
+                            }
+                        }
+                    });
+                } else {
+                    layer.msg('ID不存在！');
+                }
+            },
+
+            // 考试提交
+            submit: function (obj) {
+                let loader = layer.load();
+                let param = {
+                    bookCode: bookCode,
+                    answerTrue: answerTrue.size,
+                    totalQuestions: total
+                };
+                $.ajax({
+                    url: MODULE_SCORE_API + '/add',
+                    data: JSON.stringify(param),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'post',
+                    success: function (result) {
+                        layer.close(loader);
+                        if (result.status == 200) {
+                            popup.success(result.message, function () {
+                                // 清空提交面板，确保只提交 1 次
+                                $(obj).attr('disabled', true);
+                                $('#exam_submit').empty();
+                                $('#exam_submit').append(`<div class="operation">${getSimpleOperationNode('上一步', '下一步')}</div>`);
+                                // 考试结果显示
+                                let score = result.data;
+                                let info = [];
+                                info.push('词汇书：' + score['bookName']);
+                                info.push('总分：' + score['totalScore'] + ' 分制');
+                                info.push('得分：' + score['score']);
+                                info.push('学习积分：' + score['point']);
+                                info.push('总题量：' + score['totalQuestions']);
+                                info.push('答对量：' + score['answerTrue']);
+                                info.push('考试时间：' + score['examTime']);
+
+                                $('#exam_result').html(info.join('\r\n'));
+                                // 下一步
+                                step.next('#stepForm');
+                            });
+                        } else {
+                            popup.failure(result.message);
+                        }
+                    }
+                });
+            }
+        };
+
+        // 将内部方法传递到window对象
+        window.insideMethods = methods;
+
+        /**
+         * 已作答的题目禁止重复作答
+         */
+        function disabledAnswer(wordId) {
+            // 按钮不可用
+            $('.answer button[word-id="' + wordId + '"]').attr('disabled', true);
+            $('.answer button[word-id="' + wordId + '"]').attr('style', 'opacity:0.5;');
+            // 输入框不可更改
+            $('#answer_' + wordId).attr('readonly', true);
+        }
+
+        /**
+         * 结果展示
+         * @param wordId
+         * @param trueAnswer
+         * @param isTrue
+         */
+        function showAnswerResult(wordId, trueAnswer, isTrue) {
+            let result = [];
+            result.push('<div class="title"><h3><b>结果</b></h3></div><div class="body"><h1 class="font-blue"><b>');
+            result.push(trueAnswer);
+            result.push('</b></h1>');
+            if (isTrue == 1) {
+                result.push('<button class="pear-btn pear-btn-primary pear-btn-md"><i class="layui-icon layui-icon-ok"></i>&nbsp;回答正确</button>');
+            } else if (isTrue == 0) {
+                result.push('<button class="pear-btn pear-btn-danger pear-btn-md"><i class="layui-icon layui-icon-close"></i>&nbsp;回答错误</button>');
+            } else if (isTrue == -1) { // 超时作答
+                result.push('<button class="pear-btn pear-btn-danger pear-btn-md"><i class="layui-icon layui-icon-close"></i>&nbsp;超时作答</button>');
+            }
+
+            result.push('</div>');
+
+            // 将信息渲染到结果展示区
+            $('.result[word-id="' + wordId + '"]').html(result.join(''));
+        }
+
+        /**
+         * 作答倒计时
+         */
+        function startAnswerInterval() {
+            console.log('倒计时')
+            let time = 29;
+            let interval = setInterval(function () {
+                $('.layui-this .operation .timeInterval').text(time);
+                if (time == 0) {
+                    // 若作答为空，超时作答；若不为空，自动提交
+                    if ($('.layui-this .answer input').val() == '') {
+                        $('.layui-this .answer input').val('-');
+                    }
+                    $('.layui-this .answer .confirm').trigger('click');
+                }
+                time--;
+            }, 1000);
+
+            return interval;
+        }
+
+        // 操作按钮（下一题）变更
+        function changeOperation(obj) {
+            $(obj).parent('.operation').prepend(getSimpleOperationNode('上一题', '下一题'));
+            $(obj).remove();
+        }
+
+        /**
+         * 获取通用操作按钮
+         * @returns {string}
+         */
+        function getSimpleOperationNode(text1, text2) {
+            let node = `<button class="pear-btn pear-btn-primary pear-btn-lg" onclick="insideMethods.preStep(this)">&nbsp;${text1}<i class="layui-icon layui-icon-prev"></i></button>
+                        <button class="pear-btn pear-btn-primary pear-btn-lg" onclick="insideMethods.nextStep(this)">${text2}&nbsp;<i class="layui-icon layui-icon-next"></i></button>`
+
+            return node;
+        }
+    });
+</script>
+</body>
+</html>

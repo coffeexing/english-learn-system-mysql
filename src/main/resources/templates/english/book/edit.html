@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('英语书籍编辑')"/>
+</head>
+<body>
+<form class="layui-form" th:if="${exist}">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="layui-form-item layui-hide">
+                <label class="layui-form-label">主键：</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${book.getId()}" name="id" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">书籍编码：</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${book.getBookCode()}" name="bookCode" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input" required readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">书籍名称：</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${book.getBookName()}" name="bookName" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input" required>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">描述：</label>
+                <div class="layui-input-block">
+                    <textarea type="text" th:text="${book.getDescription()}" name="description" placeholder="请输入描述"
+                              class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">基础练习题量：</label>
+                <div class="layui-input-block">
+                    <input type="number" th:value="${book.getBasePracticeNum()}" name="basePracticeNum"
+                           lay-verify="title" placeholder="默认为当前书籍全部词汇" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">英译汉练习题量：</label>
+                <div class="layui-input-block">
+                    <input type="number" th:value="${book.getTranslatePracticeNum()}" name="translatePracticeNum"
+                           placeholder="默认为当前书籍全部词汇" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">综合测试题量：</label>
+                <div class="layui-input-block">
+                    <input type="number" th:value="${book.getExamNum()}" name="examNum" placeholder="默认为当前书籍全部词汇"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit="" lay-filter="form-save">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+<h2 th:if="${!exist}">英语书籍不存在！</h2>
+
+<th:block th:include="common/include :: footer"/>
+<script>
+    layui.use(['table', 'form', 'jquery', 'transfer'], function () {
+        let table = layui.table,
+            form = layui.form,
+            $ = layui.jquery,
+            transfer = layui.transfer;
+
+        let MODULE_API = '/english/api/book/';
+
+        /**
+         * 提交编辑英语书籍表单
+         */
+        form.on('submit(form-save)', function (data) {
+            let formData = data.field;
+
+            $.ajax({
+                url: MODULE_API + 'modify',
+                data: JSON.stringify(formData),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'put',
+                success: function (result) {
+                    if (result.status == 200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("main_table");
+                        });
+                    } else {
+                        layer.open({content: result.message});
+                    }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

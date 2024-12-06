@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('用户修改')"/>
+</head>
+<body>
+<form class="layui-form" action="" th:if="${exist}">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="layui-form-item layui-hide">
+                <input type="hidden" th:value="${userId}" name="userId" readonly>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${username}" name="username" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">密码</label>
+                <div class="layui-input-block">
+                    <input type="password" name="password" lay-verify="title" autocomplete="off"
+                           placeholder="若不填则不修改" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${realName}" name="realName" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">性别</label>
+                <div class="layui-input-block">
+                    <input type="radio" th:checked="${sex eq '1'}" name="sex" value="1" title="男">
+                    <input type="radio" th:checked="${sex eq '0'}" name="sex" value="0" title="女">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">部门</label>
+                <div class="layui-input-block">
+                    <ul id="selectParent" name="parentId" class="dtree" th:attr="data-id=${deptId}"></ul>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${email}" name="email" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">电话</label>
+                <div class="layui-input-block">
+                    <input type="text" th:value="${phone}" name="phone" lay-verify="title"
+                           autocomplete="off" placeholder="请输入" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">角色：</label>
+                <div class="layui-input-block input-sm">
+                    <input th:attr="data=${#strings.listJoin(roleIds,',')}" id="user_roles" class="layui-input"
+                           type="text" placeholder="请选择" readonly/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+                    lay-filter="user-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+<h2 th:if="${!exist}">用户不存在！</h2>
+
+<th:block th:include="common/include :: footer"/>
+<script>
+    layui.use(['form', 'jquery', 'dtree', 'transfer'], function () {
+        let form = layui.form
+            , $ = layui.jquery
+            , transfer = layui.transfer
+            , dtree = layui.dtree;
+
+        // 角色列表
+        let roleList = getDictionaryList('/system/api/role/list');
+        // 角色初始化
+        $('#user_roles').val(getNameAsString($('#user_roles').attr('data'), roleList));
+        // 用户：穿梭框绑定角色
+        $('#user_roles').on('click', function () {
+            let id = 'aabb';
+            layer.open({
+                content: '<div id="' + id + '"></div>'
+                , title: '请绑定角色'
+                , offset: 'auto'
+                , area: ['650px', '450px']
+                , btn: ['确定', '取消']
+                , yes: function (index, layero) {
+                    let selectedData = transfer.getData(id);
+                    let arrName = [];
+                    let arrValue = [];
+                    selectedData.forEach(o => {
+                        arrName.push(o.title);
+                        arrValue.push(o.value);
+                    });
+
+                    // 赋值
+                    $('#user_roles').val(arrName.join(','));
+                    $('#user_roles').attr('data', arrValue.join(','));
+
+                    layer.close(index);
+                }
+                , btn2: function (index, layero) {
+                    //return false 开启该代码可禁止点击该按钮关闭
+                }
+                , cancel: function () {
+                    //return false 开启该代码可禁止点击该按钮关闭
+                }
+            });
+
+            // 初始化已绑定的数据
+            let arr = $('#user_roles').attr('data').split(',');
+            renderTransfer(id, roleList, arr);
+        });
+        // 渲染部门树
+        dtree.renderSelect({
+            elem: "#selectParent",
+            url: "/system/api/dept/list/tree",
+            method: 'get',
+            // selectInputName: {nodeId: "node", context: "deptName"},
+            skin: "layui",
+            dataFormat: "list",
+            response: {treeId: "node", parentId: "parentNode", title: "deptName"},
+            // selectInitVal: [[${deptId}]]
+            selectInitVal: 0
+        });
+
+        // 表单提交
+        form.on('submit(user-update)', function (data) {
+            // 角色Id
+            let arr = $('#user_roles').attr('data') ? $('#user_roles').attr('data').split(',') : [];
+            $.extend(data.field, {roleIds: arr});
+            // 部门Id
+            $.extend(data.field, {
+                deptId: data.field['selectParent_select_nodeId'],
+                dept: data.field['selectParent_select_input']
+            });
+            delete data.field['selectParent_select_nodeId'];
+            delete data.field['selectParent_select_input'];
+
+            $.ajax({
+                url: '/system/api/user/modify',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'put',
+                success: function (result) {
+                    if (result.status == 200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("user-table");
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            });
+            return false;
+        });
+
+        /**
+         *  渲染穿梭框
+         */
+        function renderTransfer(nodeId, data, initVal) {
+            //数据格式解析
+            transfer.render({
+                elem: '#' + nodeId
+                , id: nodeId
+                , title: ['未绑定角色', '已绑定角色']
+                , value: initVal
+                , data: data
+                , parseData: function (res) {
+                    return {
+                        'value': res.code //数据值
+                        , 'title': res.name //数据标题
+                        // , "disabled": res.disabled  //是否禁用
+                        // , "checked": res.checked //是否选中
+                    }
+                }
+            });
+        }
+
+        function getNameAsString(codeArr, originArr) {
+            let arr = [];
+            originArr.forEach(o => {
+                if (codeArr.indexOf(o.code) > -1) {
+                    arr.push(o.name);
+                }
+            });
+            return arr.join(',');
+        }
+    });
+</script>
+</body>
+</html>

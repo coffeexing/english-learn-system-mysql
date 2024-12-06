@@ -1,0 +1,114 @@
+[
+  {
+    "id": 1,
+    "parentId": 0,
+    "title": "首页",
+    "type": 1,
+    "icon": "layui-icon layui-icon-console",
+    "openType": "_iframe",
+    "href": "view/console/console2.html"
+  },
+  {
+    "id": 2,
+    "parentId": 0,
+    "title": "多级导航",
+    "type": 0,
+    "icon": "layui-icon layui-icon-chart",
+    "href": "",
+    "children": [
+      {
+        "id": 3,
+        "parentId": 2,
+        "title": "导航1",
+        "icon": "layui-icon layui-icon-console",
+        "type": 1,
+        "openType": "_iframe",
+        "href": "view/console/console2.html"
+      },
+      {
+        "id": 4,
+        "parentId": 2,
+        "title": "导航2",
+        "icon": "layui-icon layui-icon-console",
+        "type": 0,
+        "href": "view/console/console2.html",
+        "children": [
+          {
+            "id": 5,
+            "parentId": 4,
+            "title": "导航2-1",
+            "icon": "layui-icon layui-icon-face-cry",
+            "type": 1,
+            "openType": "_iframe",
+            "href": "view/document/area.html"
+          },
+          {
+            "id": 6,
+            "parentId": 4,
+            "title": "导航2-2",
+            "icon": "layui-icon layui-icon-face-cry",
+            "type": 1,
+            "openType": "_iframe",
+            "href": "view/document/area.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "parentId": 0,
+    "title": "数据库管理",
+    "icon": "layui-icon layui-icon-template-1",
+    "type": 0,
+    "href": "",
+    "children": [
+      {
+        "id": 8,
+        "parentId": 7,
+        "title": "数据查询",
+        "icon": "layui-icon layui-icon-face-cry",
+        "type": 1,
+        "openType": "_iframe",
+        "href": "view/document/card.html"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "parentId": 0,
+    "title": "系统管理",
+    "icon": "layui-icon layui-icon-set-fill",
+    "type": 0,
+    "href": "",
+    "children": [
+      {
+        "id": 10,
+        "parentId": 9,
+        "title": "用户管理",
+        "icon": "layui-icon layui-icon-face-smile",
+        "type": 1,
+        "openType": "_iframe",
+        "href": "sys/manage/user"
+      },
+      {
+        "id": 11,
+        "parentId": 9,
+        "title": "角色管理",
+        "icon": "layui-icon layui-icon-face-cry",
+        "type": 1,
+        "openType": "_iframe",
+        "href": "views/system/user/main.html"
+      },
+      {
+        "id": 12,
+        "parentId": 9,
+        "title": "数据字典",
+        "icon": "layui-icon layui-icon-face-cry",
+        "type": 1,
+        "openType": "_iframe",
+        "href": "view/system/dict.html"
+      }
+    ]
+  }
+]

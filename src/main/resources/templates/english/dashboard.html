@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="common/include :: header('数据看板')"/>
+    <link rel="stylesheet" href="/admin/css/other/console2.css"/>
+    <style>
+        .font-red {
+            color: #FF2912 !important;
+        }
+
+        .font-green {
+            color: #31802A !important;
+        }
+
+        .font-gray {
+            color: grey !important;
+        }
+
+        .font-blue {
+            color: #1890ff !important
+        }
+    </style>
+</head>
+<body class="pear-container">
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md12">
+        <div class="layui-row layui-col-space10">
+            <!-- 数据概览 -->
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        <fieldset class="layui-elem-field layui-field-title">
+                            <legend><h3><strong>数据概览</strong></h3></legend>
+                        </fieldset>
+                    </div>
+                    <div class="layui-card-body">
+                        <div class="layui-row layui-col-space15">
+                            <div class="layui-col-md9"></div>
+                            <div class="layui-col-md3">
+                                <input class="layui-input" type="text" id="overViewMonth" placeholder="全部"/>
+                            </div>
+                            <div class="layui-col-md3 layui-col-sm3 layui-col-xs3">
+                                <div class="pear-card2">
+                                    <div class="title">最后一次考试时间</div>
+                                    <div id="notStartMission" class="count font-gray"
+                                         th:text="${#dates.format(overview.get('lastedExamTime'),'yyyy/MM/dd HH:mm:ss')}"></div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md3 layui-col-sm3 layui-col-xs3">
+                                <div class="pear-card2">
+                                    <div class="title">总考试次数</div>
+                                    <div id="delayMission" class="count font-red"
+                                         th:text="${overview.get('totalExam')}"></div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md3 layui-col-sm3 layui-col-xs3">
+                                <div class="pear-card2">
+                                    <div class="title">通过率</div>
+                                    <div id="proceedMission" class="count font-blue"
+                                         th:text="${overview.get('pass') * 100 + '%'}"></div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md3 layui-col-sm3 layui-col-xs3">
+                                <div class="pear-card2">
+                                    <div class="title">累计积分</div>
+                                    <div id="finishMission" class="count font-green"
+                                         th:text="${overview.get('totalPoint')}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="common/include :: footer"/>
+</body>
+</html>
+<script>
+    layui.use(['layer', 'echarts', 'laydate'], function () {
+        let $ = layui.jquery,
+            echarts = layui.echarts,
+            laydate = layui.laydate;
+
+        let MODULE_API = '/english/api/book/';
+
+        // 图表初始化
+        let currentDate = formatDate(new Date());
+        renderOwnOverview(currentDate);
+
+        laydate.render({
+            elem: '#overViewMonth',
+            type: 'month',
+            done: function (value, data) {
+                // 个人会议概览渲染
+                renderOwnOverview(value);
+            }
+            , trigger: 'click'
+        });
+
+        /**
+         *  个人数据概览渲染
+         * */
+        function renderOwnOverview(month) {
+            // $.ajax({
+            //     url: MODULE_API + 'retrieval/owned/overview?missionStartMonth=' + month,
+            //     dataType: 'json',
+            //     type: 'GET',
+            //     success: function (result) {
+            //         if (result.status == 200) {
+            //             let map = result.data;
+            //             $('#notStartMission').text(map['1'] == undefined ? 0 : map['1']);
+            //             $('#proceedMission').text(map['2'] == undefined ? 0 : map['2']);
+            //             $('#delayMission').text(map['3'] == undefined ? 0 : map['3']);
+            //             $('#finishMission').text(map['4'] == undefined ? 0 : map['4']);
+            //         } else {
+            //             layer.msg('该月份暂无暂无个人会议概览信息！');
+            //             $('#notStartMission').text('0');
+            //             $('#proceedMission').text('0');
+            //             $('#delayMission').text('0');
+            //             $('#finishMission').text('0');
+            //         }
+            //     }
+            // });
+        }
+    });
+</script>
